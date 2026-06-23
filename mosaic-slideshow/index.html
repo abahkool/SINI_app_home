@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mosaic SlideShow — Multi-Source Photo Slideshow for Windows</title>
+    <meta name="description" content="Run 4 independent photo sets simultaneously with audio, animations, and flexible layouts. Free Chrome extension or $12 desktop app for Windows. No subscriptions. No data collection.">
+    <meta name="keywords" content="slideshow, photo presenter, digital signage, event photography, worship presentation, memorial slideshow, Windows desktop app, Chrome extension">
+    <link rel="icon" href="assets\icon.png">
+    <style>
+        :root {
+            --primary: #6750A4;
+            --primary-dark: #4F378B;
+            --primary-light: #D0BCFF;
+            --surface: #FFFBFE;
+            --surface2: #F5EFF7;
+            --text: #1C1B1F;
+            --text-muted: #49454F;
+            --border: #CAC4D0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --green: #2e7d32;
+            --red: #c62828;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            background: var(--surface);
+            line-height: 1.6;
+        }
+        .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+        .container-wide { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, #3a1f6a 100%);
+            color: #fff; text-align: center; padding: 80px 24px 60px;
+            position: relative; overflow: hidden;
+        }
+        .hero::after {
+            content: ''; position: absolute; bottom: -40px; left: 0; right: 0;
+            height: 80px; background: var(--surface);
+            border-radius: 50% 50% 0 0;
+        }
+        .hero h1 { font-size: 2.8rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.01em; }
+        .hero h1 img { width: 52px; height: 52px; vertical-align: middle; border-radius: 14px; margin-right: 14px; }
+        .hero .tagline { font-size: 1.2rem; opacity: .88; max-width: 600px; margin: 0 auto 10px; }
+        .hero .subtagline { font-size: .95rem; opacity: .65; max-width: 520px; margin: 0 auto 28px; }
+        .hero .badge { display: inline-block; background: rgba(255,255,255,.15); border-radius: 20px; padding: 5px 14px; font-size: .8em; margin-bottom: 18px; }
+        .hero .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+        .hero .badges span { background: rgba(255,255,255,.12); border-radius: 20px; padding: 4px 12px; font-size: .75em; }
+
+        /* Buttons */
+        .btn {
+            display: inline-block; padding: 12px 28px; border-radius: 24px;
+            font-weight: 600; font-size: .95em; text-decoration: none; transition: all .2s;
+            cursor: pointer; border: none;
+        }
+        .btn-primary { background: #fff; color: var(--primary); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+        .btn-outline { border: 2px solid rgba(255,255,255,.5); color: #fff; background: transparent; }
+        .btn-outline:hover { background: rgba(255,255,255,.12); transform: translateY(-1px); }
+        .btn-buy { background: var(--primary); color: #fff; display: inline-block; }
+        .btn-buy:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(103,80,164,.3); }
+        .btn-small { padding: 8px 18px; font-size: .82em; }
+        .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: #e8e0f0; }
+
+        /* Sections */
+        section { padding: 60px 0; }
+        section h2 { font-size: 1.8rem; font-weight: 700; text-align: center; margin-bottom: 8px; }
+        section .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 36px; font-size: .95em; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .section-alt { background: var(--surface2); }
+
+        /* Features grid */
+        .features { display: grid; grid-template-columns: repeat(auto-fill,minmax(270px,1fr)); gap: 20px; }
+        .feature-card {
+            background: var(--surface); padding: 24px; border-radius: var(--radius);
+            box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s;
+            border: 1px solid var(--border);
+        }
+        .feature-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+        .feature-card .icon { font-size: 1.6rem; margin-bottom: 10px; display: block; }
+        .feature-card h3 { font-size: 1.05rem; margin-bottom: 6px; }
+        .feature-card h3 .electron-tag {
+            display: inline-block; font-size: .58em; font-weight: 600; text-transform: uppercase;
+            background: var(--primary); color: #fff; padding: 1px 8px; border-radius: 10px;
+            vertical-align: middle; margin-left: 6px; letter-spacing: .3px;
+        }
+        .feature-card p { font-size: .88em; color: var(--text-muted); }
+
+        /* Use-cases */
+        .use-cases { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 16px; }
+        .use-case {
+            background: var(--surface); border-radius: var(--radius); padding: 20px;
+            border: 1px solid var(--border); text-align: center;
+        }
+        .use-case .icon { font-size: 2rem; margin-bottom: 8px; }
+        .use-case h3 { font-size: .95rem; margin-bottom: 4px; }
+        .use-case p { font-size: .82em; color: var(--text-muted); }
+
+        /* Comparison table */
+        .compare-wrap { overflow-x: auto; }
+        .compare { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        .compare th, .compare td { padding: 10px 14px; text-align: center; border-bottom: 1px solid var(--border); }
+        .compare th:first-child, .compare td:first-child { text-align: left; }
+        .compare th { background: var(--surface2); font-weight: 600; font-size: .88em; }
+        .compare td { font-size: .85em; }
+        .compare .check { color: var(--green); font-weight: 700; }
+        .compare .cross { color: var(--red); }
+        .compare .highlight { background: rgba(103,80,164,.06); }
+
+        /* Pricing */
+        .pricing-grid { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+        .pricing-card {
+            flex: 1; min-width: 280px; max-width: 400px;
+            background: var(--surface); border-radius: var(--radius); padding: 32px; text-align: center;
+            box-shadow: var(--shadow); border: 2px solid var(--border);
+            transition: transform .15s, box-shadow .15s;
+        }
+        .pricing-card.featured { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary), var(--shadow-lg); }
+        .pricing-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .pricing-card.featured:hover { box-shadow: 0 0 0 1px var(--primary), var(--shadow-lg); }
+        .pricing-card .tier-label {
+            font-size: .7em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--primary); margin-bottom: 4px;
+        }
+        .pricing-card h3 { font-size: 1.15rem; margin-bottom: 4px; }
+        .pricing-card .desc { font-size: .82em; color: var(--text-muted); margin-bottom: 16px; }
+        .pricing-card .price { font-size: 2.6rem; font-weight: 700; color: var(--primary); }
+        .pricing-card .period { color: var(--text-muted); font-size: .85em; margin-bottom: 16px; }
+        .pricing-card ul { list-style: none; margin: 16px 0 20px; text-align: left; }
+        .pricing-card ul li { padding: 5px 0; font-size: .88em; }
+        .pricing-card ul li::before { content: '\2713'; color: var(--green); margin-right: 8px; font-weight: 700; }
+        .pricing-card ul li.na { color: var(--text-muted); }
+        .pricing-card ul li.na::before { content: '\2014'; color: var(--border); }
+
+        /* FAQ */
+        .faq-list { max-width: 700px; margin: 0 auto; }
+        .faq-item { border-bottom: 1px solid var(--border); padding: 18px 0; }
+        .faq-item:first-child { border-top: 1px solid var(--border); }
+        .faq-item h3 { font-size: .95rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .faq-item p { font-size: .88em; color: var(--text-muted); margin-top: 8px; line-height: 1.55; }
+
+        /* System reqs */
+        .sysreq { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 12px; max-width: 720px; margin: 0 auto; }
+        .sysreq-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px 18px; font-size: .85em; }
+        .sysreq-item strong { display: block; font-size: .88em; margin-bottom: 2px; }
+        .sysreq-item span { color: var(--text-muted); }
+
+        /* Testimonial / callout */
+        .callout {
+            text-align: center; padding: 40px 24px;
+            background: linear-gradient(135deg, var(--surface2), #ede7f6);
+            border-radius: var(--radius); max-width: 720px; margin: 0 auto;
+        }
+        .callout p { font-size: .95em; color: var(--text-muted); max-width: 560px; margin: 0 auto; }
+        .callout strong { color: var(--text); }
+
+        /* Footer */
+        footer {
+            background: var(--surface2); padding: 48px 0 24px; margin-top: 40px;
+            font-size: .85em; color: var(--text-muted);
+        }
+        footer .footer-grid { display: flex; flex-wrap: wrap; gap: 28px; justify-content: space-between; margin-bottom: 28px; }
+        footer a { color: var(--primary); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        .social-links { display: flex; gap: 10px; }
+        .social-links a {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 50%; background: var(--primary);
+            color: #fff; font-size: .9rem; text-decoration: none;
+        }
+        .social-links a:hover { background: var(--primary-dark); }
+        .footer-bottom { border-top: 1px solid var(--border); padding-top: 16px; text-align: center; font-size: .8em; }
+
+        /* Legal */
+        .legal { max-width: 720px; margin: 0 auto; font-size: .9em; color: var(--text-muted); }
+        .legal h3 { color: var(--text); margin: 24px 0 8px; }
+        .legal p { margin-bottom: 10px; }
+
+        /* Cookie banner */
+        .cookie-banner {
+            position: fixed; bottom: 0; left: 0; right: 0; background: #1C1B1F; color: #fff;
+            padding: 14px 24px; display: flex; align-items: center; justify-content: center;
+            gap: 14px; font-size: .83em; z-index: 1000; flex-wrap: wrap;
+        }
+        .cookie-banner button {
+            background: var(--primary); color: #fff; border: none; padding: 7px 18px;
+            border-radius: 20px; cursor: pointer; font-weight: 600; font-size: .83em;
+        }
+        .cookie-banner button:hover { background: var(--primary-dark); }
+        .cookie-banner a { color: var(--primary-light); }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.7rem; }
+            .hero h1 img { width: 40px; height: 40px; margin-right: 10px; }
+            .hero { padding: 48px 16px 36px; }
+            .hero .tagline { font-size: 1rem; }
+            .pricing-grid { flex-direction: column; align-items: stretch; }
+            .pricing-card { max-width: 100%; }
+            section h2 { font-size: 1.4rem; }
+            .features { grid-template-columns: 1fr; }
+            .use-cases { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+    <div class="badges">
+        <span>Windows Desktop App</span>
+        <span>Chrome Extension</span>
+        <span>100% Offline</span>
+        <span>No Data Collection</span>
+    </div>
+    <h1><img src="assets\icon-256.png" alt="">Mosaic SlideShow</h1>
+    <p class="tagline">Run up to 4 independent photo sets simultaneously on one screen.</p>
+    <p class="subtagline">Flexible layouts, background audio, 8 animation types, multi-language support — all running natively on your desktop. Free Chrome extension or $12 paid desktop app.</p>
+    <div>
+        <a href="#pricing" class="btn btn-primary">Buy Desktop App — $12</a>
+        <a href="#free-trial" class="btn btn-outline">Try Free Extension</a>
+    </div>
+</header>
+
+<main>
+
+<!-- ===== USE CASES ===== -->
+<section>
+    <div class="container">
+        <h2>Who It's For</h2>
+        <p class="subtitle">Purpose-built for multi-source photo presentation — not a generic image viewer.</p>
+        <div class="use-cases">
+            <div class="use-case">
+                <div class="icon">&#x1F3AC;</div>
+                <h3>Event Photographers</h3>
+                <p>Display incoming photos in real time on 4 screens at weddings, galas, and corporate events.</p>
+            </div>
+            <div class="use-case">
+                <div class="icon">&#x26EA;</div>
+                <h3>Worship Teams</h3>
+                <p>Show song lyrics, sermon notes, announcements, and offering info side by side.</p>
+            </div>
+            <div class="use-case">
+                <div class="icon">&#x1F393;</div>
+                <h3>Memorial Services</h3>
+                <p>Display photo collections across multiple eras simultaneously with a synchronized soundtrack.</p>
+            </div>
+            <div class="use-case">
+                <div class="icon">&#x1F4E1;</div>
+                <h3>Digital Signage</h3>
+                <p>Rotate promotions, announcements, and branded content on a single display or TV.</p>
+            </div>
+            <div class="use-case">
+                <div class="icon">&#x1F4F7;</div>
+                <h3>Photo Booths</h3>
+                <p>Loop recent captures alongside a gallery feed while running a background music playlist.</p>
+            </div>
+            <div class="use-case">
+                <div class="icon">&#x1F3E0;</div>
+                <h3>Home &amp; Office</h3>
+                <p>Turn any Windows PC into a multi-source digital photo frame with your own music.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section id="features" class="section-alt">
+    <div class="container-wide">
+        <h2>Everything You Need</h2>
+        <p class="subtitle">A professional-grade slideshow engine with full control over every detail.</p>
+        <div class="features">
+            <div class="feature-card">
+                <span class="icon">&#x1F5BC;&#xFE0F;</span>
+                <h3>4 Independent Photo Sets</h3>
+                <p>Load up to 4 folders simultaneously, each with its own sort order, animation, pause, stretch, orientation filter, and loop toggle. Mix portrait and landscape photos per set.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">&#x1F4D0;</span>
+                <h3>12+ Layouts</h3>
+                <p>2x2 grid, 1x4 row, 4x1 column, asymmetric splits (3+1, 1+3, 1+2), and auto flex. Drag to reorder blocks. 3-set layouts automatically ignore Set 4.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">&#x1F3B5;</span>
+                <h3>Background Audio</h3>
+                <p>Load entire music folders. Playlist with shuffle, loop, stop/pause/prev/next controls. Auto-plays when slideshow starts. Float bar in the presentation area with auto-hide.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">&#x1F3AC;</span>
+                <h3>8 Animation Types</h3>
+                <p>Fade, Slide, Zoom, Flip, Bounce, Rotate, Blur, Blink — or no animation. Adjustable interval (0.5–60 sec). Staggered random delays between blocks for organic feel.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">&#x1F3A8;</span>
+                <h3>Frame &amp; Wing Blur Effects</h3>
+                <p>Per-set photo frames with stacked color + thickness controls via chip selector. Wing Blur fills empty letterbox/pillarbox areas with a blurred copy of the photo.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">&#x1F310;</span>
+                <h3>9 Languages</h3>
+                <p>English, Chinese (Simplified), French, Spanish, Arabic, Malay, Hindi, Portuguese, and Russian. Full UI translation including all labels, buttons, and notifications.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">&#x1F30D;</span>
+                <h3>Screen Wake Lock</h3>
+                <p>Prevents the display from going to sleep during presentations. Fullscreen mode with auto-hiding controls that reappear on mouse movement.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">&#x1F578;&#xFE0F;</span>
+                <h3>Orientation Filter</h3>
+                <p>Show only portrait or landscape photos per set. Dimensions are detected lazily on image load — no manual tagging required.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">&#x1F501;</span>
+                <h3>Loop Control</h3>
+                <p>Per-set toggle: loop photos continuously, or stop at the last photo for a one-pass presentation. Essential for timed event sequences.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">&#x1F9F0;</span>
+                <h3>Drag-Resize Sidebar</h3>
+                <p>Collapsible, pinnable, and resizable configuration panel. Drag the edge to adjust width — width persists across restarts.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">&#x1F4BE;</span>
+                <h3>Persistent Settings</h3>
+                <p>All preferences, layout choices, folder paths, and per-set settings save automatically to localStorage. Open the app and pick up exactly where you left off.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">&#x1F512;</span>
+                <h3>100% Offline</h3>
+                <p>Runs entirely on your computer. No accounts, no sign-in, no telemetry, no cloud dependency. Your photos never leave your machine.</p>
+            </div>
+
+            <!-- Electron-only features -->
+            <div class="feature-card" style="border-left: 3px solid var(--primary);">
+                <span class="icon">&#x1F4E6;</span>
+                <h3>Floating Sidebar <span class="electron-tag">Desktop</span></h3>
+                <p>Detach the control panel into a separate window. Drag it to a second monitor for uninterrupted full-screen presentation on the primary display.</p>
+            </div>
+            <div class="feature-card" style="border-left: 3px solid var(--primary);">
+                <span class="icon">&#x1F3A5;</span>
+                <h3>Video Export <span class="electron-tag">Desktop</span></h3>
+                <p>Record the live slideshow with system audio and export in WebM, MP4, AVI, or MKV format. Captures the entire presentation area. Transcoding handled automatically — no extra software needed.</p>
+            </div>
+            <div class="feature-card" style="border-left: 3px solid var(--primary);">
+                <span class="icon">&#x1F4C2;</span>
+                <h3>Save / Load State <span class="electron-tag">Desktop</span></h3>
+                <p>Save the entire slideshow state — photo folders, layout, audio playlist, per-set settings — and restore it later with one click.</p>
+            </div>
+            <div class="feature-card" style="border-left: 3px solid var(--primary);">
+                <span class="icon">&#x1F4C1;</span>
+                <h3>Folder &amp; Audio Persistence <span class="electron-tag">Desktop</span></h3>
+                <p>Native file system access via Electron IPC means your path selections survive restarts. No re-browsing to the same folders every session — paths are stored and verified on launch.</p>
+            </div>
+            <div class="feature-card" style="border-left: 3px solid var(--primary);">
+                <span class="icon">&#x1F6A9;</span>
+                <h3>No Watermark <span class="electron-tag">Desktop</span></h3>
+                <p>The free Chrome extension displays a small "Mosaic SlideShow" watermark over the slideshow area. The desktop app is completely clean — no branding overlay on your presentation.</p>
+            </div>
+            <div class="feature-card" style="border-left: 3px solid var(--primary);">
+                <span class="icon">&#x2709;&#xFE0F;</span>
+                <h3>Email Support <span class="electron-tag">Desktop</span></h3>
+                <p>Direct email assistance for setup, troubleshooting, and feature questions. We respond promptly to paying customers.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== COMPARISON ===== -->
+<section id="compare">
+    <div class="container">
+        <h2>Chrome Extension vs Desktop App</h2>
+        <p class="subtitle">The free Chrome extension is a fully functional showcase of the slideshow engine. The desktop app removes browser platform limits and adds pro features.</p>
+        <div class="compare-wrap">
+            <table class="compare">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Chrome Extension <span style="font-weight:400;font-size:.78em;color:var(--green)">(Free)</span></th>
+                        <th>Desktop App <span style="font-weight:400;font-size:.78em;color:var(--primary)">($12)</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>4 independent photo sets</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+                    <tr><td>12+ layout configurations</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+                    <tr><td>8 animation types with staggered delays</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+                    <tr><td>Background audio with playlist, shuffle, loop</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+                    <tr><td>Frame &amp; Wing Blur effects (chip selector)</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+                    <tr><td>9 languages (full UI translation)</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+                    <tr><td>Orientation filter (portrait/landscape)</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+                    <tr><td>Screen Wake Lock</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+                    <tr><td>Fullscreen mode with auto-hide controls</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+                    <tr><td>Keyboard shortcuts (Space, arrows, F, B, Esc)</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+                    <tr><td>Collapsible, pinnable, resizable sidebar</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+                    <tr><td>Persistent settings (localStorage)</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+                    <tr class="highlight"><td><strong>Floating detachable sidebar</strong></td><td class="cross">&#x2717;</td><td class="check">&#x2713;</td></tr>
+                    <tr class="highlight"><td><strong>Video export (WebM, MP4, AVI, MKV)</strong></td><td class="cross">&#x2717;</td><td class="check">&#x2713;</td></tr>
+                    <tr class="highlight"><td><strong>Native folder path persistence</strong></td><td class="cross">&#x2717;</td><td class="check">&#x2713;</td></tr>
+                    <tr class="highlight"><td><strong>Save / Load state</strong></td><td class="cross">&#x2717;</td><td class="check">&#x2713;</td></tr>
+                    <tr class="highlight"><td><strong>No watermark</strong></td><td class="cross">&#x2717;</td><td class="check">&#x2713;</td></tr>
+                    <tr class="highlight"><td><strong>Email support</strong></td><td class="cross">&#x2717;</td><td class="check">&#x2713;</td></tr>
+                    <tr style="font-weight:600;border-top:2px solid var(--text);">
+                        <td>Price</td><td><span style="color:var(--green)">Free</span></td><td><span style="color:var(--primary)">$12 one-time</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p style="text-align:center;font-size:.78em;color:var(--text-muted);margin-top:18px;max-width:680px;margin-left:auto;margin-right:auto;">
+            The Chrome extension is a fully capable app. Gaps like native file persistence and detached sidebar are limits imposed by the browser sandbox and not artificial restrictions. The desktop app solves these through native OS integration.
+        </p>
+    </div>
+</section>
+
+<!-- ===== FREE TRIAL SECTION ===== -->
+<section id="free-trial" class="section-alt">
+    <div class="container" style="text-align:center;">
+        <h2>Try Before You Buy</h2>
+        <p class="subtitle">The free Chrome extension includes the full slideshow engine — every layout, every animation, every language. Add it to Chrome in one click.</p>
+        <div style="margin: 8px 0 20px;">
+            <span style="display:inline-block;background:#e8f5e9;color:var(--green);border-radius:12px;padding:4px 14px;font-size:.82em;font-weight:600;">&#x2713; No account required</span>
+            &nbsp;
+            <span style="display:inline-block;background:#fff3e0;color:#e65100;border-radius:12px;padding:4px 14px;font-size:.82em;font-weight:600;">&#x26A0; Watermarked</span>
+            &nbsp;
+            <span style="display:inline-block;background:#e3f2fd;color:#1565c0;border-radius:12px;padding:4px 14px;font-size:.82em;font-weight:600;">&#x1F310; 9 languages</span>
+        </div>
+        <p style="font-size:.88em;color:var(--text-muted);margin-bottom:20px;">
+            The extension replaces your Chrome new tab page with the slideshow. Open a new tab, and your photos are running.
+        </p>
+        <a href="https://chrome.google.com/webstore" class="btn btn-primary" style="background:var(--primary);color:#fff;">
+            &#x2B22; Add to Chrome — Free
+        </a>
+        <p style="margin-top:10px;font-size:.75em;color:var(--text-muted);">
+            Requires Chrome 90+ &middot; Uses File System Access API &middot; <a href="#privacy" style="color:var(--primary)">Privacy Policy</a>
+        </p>
+    </div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section>
+    <div class="container">
+        <h2>How It Works</h2>
+        <p class="subtitle">One-window app. Load photos. Pick a layout. Press play.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;max-width:800px;margin:0 auto;">
+            <div style="text-align:center;padding:16px;">
+                <div style="width:44px;height:44px;border-radius:22px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;margin-bottom:10px;">1</div>
+                <h3 style="font-size:.9rem;margin-bottom:4px;">Add Photos</h3>
+                <p style="font-size:.8em;color:var(--text-muted);">Select 1–4 folders with images. Toggle recursive loading and filename filters per set.</p>
+            </div>
+            <div style="text-align:center;padding:16px;">
+                <div style="width:44px;height:44px;border-radius:22px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;margin-bottom:10px;">2</div>
+                <h3 style="font-size:.9rem;margin-bottom:4px;">Choose Layout</h3>
+                <p style="font-size:.8em;color:var(--text-muted);">Pick from 12+ grid and asymmetric layouts. Drag blocks to reorder.</p>
+            </div>
+            <div style="text-align:center;padding:16px;">
+                <div style="width:44px;height:44px;border-radius:22px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;margin-bottom:10px;">3</div>
+                <h3 style="font-size:.9rem;margin-bottom:4px;">Add Audio</h3>
+                <p style="font-size:.8em;color:var(--text-muted);">Optional: select a music folder. Shuffle, loop, and transport controls built in.</p>
+            </div>
+            <div style="text-align:center;padding:16px;">
+                <div style="width:44px;height:44px;border-radius:22px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;margin-bottom:10px;">4</div>
+                <h3 style="font-size:.9rem;margin-bottom:4px;">Present</h3>
+                <p style="font-size:.8em;color:var(--text-muted);">Press play, go fullscreen, and control via keyboard or on-screen buttons.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== SYSTEM REQUIREMENTS ===== -->
+<section class="section-alt">
+    <div class="container">
+        <h2>System Requirements</h2>
+        <p class="subtitle">Lightweight and runs on any modern Windows machine.</p>
+        <div class="sysreq">
+            <div class="sysreq-item">
+                <strong>Desktop App</strong>
+                <span>Windows 10 or later (x64)</span>
+            </div>
+            <div class="sysreq-item">
+                <strong>Chrome Extension</strong>
+                <span>Chrome/Edge 90+ (Chromium)</span>
+            </div>
+            <div class="sysreq-item">
+                <strong>RAM</strong>
+                <span>1 GB minimum (2 GB recommended)</span>
+            </div>
+            <div class="sysreq-item">
+                <strong>Storage</strong>
+                <span>~150 MB (app) + your photos</span>
+            </div>
+            <div class="sysreq-item">
+                <strong>Display</strong>
+                <span>Any resolution; multi-monitor supported</span>
+            </div>
+            <div class="sysreq-item">
+                <strong>Image Formats</strong>
+                <span>JPEG, PNG, GIF, BMP, WebP</span>
+            </div>
+            <div class="sysreq-item">
+                <strong>Desktop Installers</strong>
+                <span>Portable .exe, NSIS Setup, MSI, AppX</span>
+            </div>
+            <div class="sysreq-item">
+                <strong>Audio Formats</strong>
+                <span>All browser-supported audio (MP3, WAV, OGG, FLAC, etc.)</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section>
+    <div class="container">
+        <h2>Frequently Asked Questions</h2>
+        <p class="subtitle">Common questions about the desktop app and pricing.</p>
+        <div class="faq-list">
+            <div class="faq-item">
+                <h3>What's the difference between the free extension and the $12 desktop app?</h3>
+                <p>The Chrome extension has the full slideshow engine but is limited by the browser sandbox — it can't save native file paths persistently, can't detach the sidebar into a separate window, and has no video export. It also shows a small "Mosaic SlideShow" watermark. The desktop app removes all these limits and runs as a native Windows application.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Is it really a one-time payment? No subscription?</h3>
+                <p>Yes — $12 one-time, lifetime access. No recurring charges. All bug-fix updates are included. Major version upgrades may be offered at a discounted rate.</p>
+            </div>
+            <div class="faq-item">
+                <h3>How many computers can I install it on?</h3>
+                <p>Up to 3 personal devices per license. For commercial or multi-seat deployments, contact us for volume pricing.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Do you collect my data or photos?</h3>
+                <p>No. The app runs 100% offline. No analytics, no telemetry, no crash reports, no tracking. Your photos, audio files, folder paths, and settings never leave your computer. Payment data is handled by Polar.sh — we never see your credit card.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Can I run the desktop app on a single monitor?</h3>
+                <p>Yes. With the floating sidebar feature, you can detach the configuration panel into its own window and position it wherever you like. On a single monitor you can keep it on top or toggle it with the keyboard (B / Ctrl+B).</p>
+            </div>
+            <div class="faq-item">
+                <h3>Can I record the slideshow as a video?</h3>
+                <p>Yes (desktop app only). Use the built-in Video Export feature which captures the entire slideshow area plus system audio. Choose your output format — WebM, MP4, AVI, or MKV. The app handles transcoding automatically via bundled FFmpeg. Ideal for creating timelapse recordings or sharing presentation videos.</p>
+            </div>
+            <div class="faq-item">
+                <h3>What's the watermark situation in the free version?</h3>
+                <p>The Chrome extension displays a small "Mosaic SlideShow" watermark centered in the slideshow area. The desktop app has no watermark — your presentation is completely clean.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Can I use this for commercial events?</h3>
+                <p>Yes. The license covers personal and commercial use (events, digital signage, photo booths, etc.) on up to 3 devices per purchase. For larger deployments, contact us.</p>
+            </div>
+            <div class="faq-item">
+                <h3>How do I buy? What payment methods are accepted?</h3>
+                <p>Purchases are processed via Polar.sh, a secure payment platform. They accept credit/debit cards and PayPal. No account is required on our side — you receive a download link after purchase.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section id="pricing" class="section-alt">
+    <div class="container">
+        <h2>Choose Your Version</h2>
+        <p class="subtitle">No subscriptions. Buy once, use forever. No hidden fees.</p>
+        <div class="pricing-grid">
+            <!-- Free tier -->
+            <div class="pricing-card">
+                <div class="tier-label">Free</div>
+                <h3>Chrome Extension</h3>
+                <p class="desc">Full slideshow engine, limited by browser sandbox</p>
+                <div class="price" style="font-size:2rem;">$0</div>
+                <div class="period">Always free</div>
+                <ul>
+                    <li>4 photo sets with all layouts</li>
+                    <li>8 animation types</li>
+                    <li>Background audio with transport controls</li>
+                    <li>Frame &amp; Wing Blur effects</li>
+                    <li>9 languages</li>
+                    <li>Orientation filter</li>
+                    <li>Screen Wake Lock</li>
+                </ul>
+                <a href="https://chrome.google.com/webstore" class="btn btn-secondary btn-small">Add to Chrome</a>
+            </div>
+
+            <!-- Desktop App -->
+            <div class="pricing-card featured">
+                <div class="tier-label" style="color:var(--primary-dark);font-weight:800;">Most Capable</div>
+                <h3>Desktop App</h3>
+                <p class="desc">Everything in the extension, plus native Windows integration</p>
+                <div class="price">$12</div>
+                <div class="period">One-time — Lifetime access &middot; 3 devices</div>
+                <ul>
+                    <li>Everything in the free extension</li>
+                    <li>Floating sidebar (separate window)</li>
+                    <li>Video export (WebM, MP4, AVI, MKV)</li>
+                    <li>Native folder path persistence</li>
+                    <li>Save / Load state</li>
+                    <li>No watermark</li>
+                    <li>Email support</li>
+                </ul>
+                <a href="https://polar.sh/mosaic-slideshow" class="btn btn-buy">Purchase — $12</a>
+                <p style="margin-top:10px;font-size:.72em;color:var(--text-muted);">Instant license key delivery after purchase. No account needed.</p>
+            </div>
+        </div>
+        <p style="margin-top:24px;text-align:center;font-size:.75em;color:var(--text-muted);">Secure payment processing by Polar.sh. All prices include tax where applicable.</p>
+
+        <div style="margin-top:28px;">
+            <div class="callout">
+                <p><strong>Not sure yet?</strong> Install the free Chrome extension to test the full slideshow engine with your own photos. When you need native persistence, video export, or a clean presentation without a watermark, upgrade to the desktop app — your settings and folders carry across.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== DOWNLOAD OPTIONS ===== -->
+<section>
+    <div class="container">
+        <h2>Desktop App — Download Options</h2>
+        <p class="subtitle">Four installer formats for different deployment needs.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;max-width:800px;margin:0 auto;">
+            <div style="background:var(--surface2);border-radius:var(--radius);padding:20px;border:1px solid var(--border);text-align:center;">
+                <div style="font-size:1.3rem;margin-bottom:6px;">&#x1F4E6;</div>
+                <h3 style="font-size:.9rem;margin-bottom:4px;">Portable .exe</h3>
+                <p style="font-size:.78em;color:var(--text-muted);">Single executable. No install. Runs from any folder or USB drive.</p>
+            </div>
+            <div style="background:var(--surface2);border-radius:var(--radius);padding:20px;border:1px solid var(--border);text-align:center;">
+                <div style="font-size:1.3rem;margin-bottom:6px;">&#x2699;&#xFE0F;</div>
+                <h3 style="font-size:.9rem;margin-bottom:4px;">NSIS Installer</h3>
+                <p style="font-size:.78em;color:var(--text-muted);">Standard Windows setup with Start Menu shortcut and desktop icon. Choose install location.</p>
+            </div>
+            <div style="background:var(--surface2);border-radius:var(--radius);padding:20px;border:1px solid var(--border);text-align:center;">
+                <div style="font-size:1.3rem;margin-bottom:6px;">&#x1F4E5;</div>
+                <h3 style="font-size:.9rem;margin-bottom:4px;">MSI Package</h3>
+                <p style="font-size:.78em;color:var(--text-muted);">For enterprise deployment via Group Policy or SCCM. Silent install supported.</p>
+            </div>
+            <div style="background:var(--surface2);border-radius:var(--radius);padding:20px;border:1px solid var(--border);text-align:center;">
+                <div style="font-size:1.3rem;margin-bottom:6px;">&#x1F4F1;</div>
+                <h3 style="font-size:.9rem;margin-bottom:4px;">AppX Package</h3>
+                <p style="font-size:.78em;color:var(--text-muted);">Microsoft Store-compatible package for managed Windows devices.</p>
+            </div>
+        </div>
+        <p style="text-align:center;font-size:.78em;color:var(--text-muted);margin-top:16px;">
+            All formats are included with purchase. Download links provided after checkout.
+        </p>
+    </div>
+</section>
+
+<!-- ===== LEGAL ===== -->
+<section id="legal" class="section-alt">
+    <div class="container legal">
+        <h2 id="terms">Terms of Use</h2>
+        <p>By purchasing and using Mosaic SlideShow ("the Software"), you agree to these terms.</p>
+        <h3>License</h3>
+        <p>You are granted a non-exclusive, non-transferable license to install and use the Software on up to 3 personal devices. Redistribution, resale, or reverse engineering of the Software is prohibited. Commercial use (events, signage, photo booths) is permitted within the device limit.</p>
+        <h3>Updates</h3>
+        <p>Bug-fix updates and minor version bumps are included with your purchase. Major version upgrades may be offered at a discounted upgrade price.</p>
+        <h3>Refunds</h3>
+        <p>Given the digital nature of the product, purchases are final. Try the free Chrome extension first to confirm the software meets your needs.</p>
+        <h3>Disclaimer</h3>
+        <p>The Software is provided "as is" without warranty of any kind. The developer is not liable for any damages arising from the use or inability to use the Software.</p>
+
+        <h2 id="privacy" style="margin-top:40px">Privacy Policy</h2>
+        <p>Mosaic SlideShow does not collect, store, or transmit any personal data. The Software runs entirely on your local machine.</p>
+        <h3>What We Don't Collect</h3>
+        <p>No analytics, no telemetry, no usage tracking, no crash reports, no cookies, no behavioral data. Your photos, audio files, folder paths, and slideshow configurations never leave your computer.</p>
+        <h3>Chrome Extension</h3>
+        <p>The Chrome extension requires <code>fileSystem</code> and <code>storage</code> permissions to read local folders and save settings. These permissions are used only for local operations — no data is transmitted.</p>
+        <h3>Payment Processing</h3>
+        <p>Payments are processed by Polar.sh. Please refer to <a href="https://polar.sh/privacy" target="_blank" rel="noopener">Polar.sh's Privacy Policy</a> for details on how they handle your payment information. We do not receive or store your credit card details.</p>
+        <h3>Contact</h3>
+        <p>For privacy inquiries, contact <a href="mailto:privacy@mosaic-slideshow.com">privacy@mosaic-slideshow.com</a>.</p>
+    </div>
+</section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+    <div class="container">
+        <div class="footer-grid">
+            <div>
+                <strong>Mosaic SlideShow</strong><br>
+                Version 2.0 &middot; Windows Desktop &middot; Chrome Extension
+            </div>
+            <div>
+                <a href="#features">Features</a> &middot;
+                <a href="#compare">Comparison</a> &middot;
+                <a href="#pricing">Pricing</a> &middot;
+                <a href="#terms">Terms</a> &middot;
+                <a href="#privacy">Privacy</a>
+            </div>
+            <div>
+                <a href="mailto:support@mosaic-slideshow.com">support@mosaic-slideshow.com</a>
+            </div>
+            <div class="social-links">
+                <a href="https://github.com/abahkool/PhotoSlideShow" target="_blank" rel="noopener" title="GitHub">&#x2764;</a>
+                <a href="https://twitter.com/mosaicslideshow" target="_blank" rel="noopener" title="X / Twitter">&#x2715;</a>
+                <a href="https://linkedin.com/company/mosaic-slideshow" target="_blank" rel="noopener" title="LinkedIn">&#x2197;</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026&ndash;2026 Mosaic SlideShow. Runs entirely on your computer. No data is sent to external servers. Built with Electron.
+        </div>
+    </div>
+</footer>
+
+<!-- ===== COOKIE CONSENT ===== -->
+<div class="cookie-banner" id="cookieBanner">
+    <span>This site uses no tracking cookies. By continuing, you acknowledge our <a href="#privacy">Privacy Policy</a>.</span>
+    <button onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('cookie-consent','1')">Got it</button>
+</div>
+<script>
+(function(){if(localStorage.getItem('cookie-consent'))document.getElementById('cookieBanner').style.display='none';})();
+</script>
+
+</body>
+</html>
