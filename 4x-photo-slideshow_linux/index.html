@@ -206,9 +206,89 @@
             .features { grid-template-columns: 1fr; }
             .use-cases { grid-template-columns: 1fr 1fr; }
         }
+        /* ===== LANGUAGE BAR (Google Translate, native language names) ===== */
+        .lang-bar {
+            position: sticky; top: 0; z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            gap: 2px; flex-wrap: wrap;
+            padding: 7px 12px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 10px rgba(52, 34, 74, .06);
+        }
+        .lang-bar::-webkit-scrollbar { display: none; }
+        .lang-bar .globe { font-size: .82rem; opacity: .6; margin-right: 4px; flex: 0 0 auto; }
+        .lang-chip {
+            flex: 0 0 auto;
+            appearance: none; -webkit-appearance: none;
+            background: transparent;
+            border: 1px solid transparent; border-radius: 999px;
+            padding: 3px 9px; cursor: pointer;
+            font-family: inherit; font-size: .82rem; line-height: 1.55;
+            color: var(--text-muted);
+            white-space: nowrap;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .lang-chip:hover { color: var(--text); background: var(--surface2); }
+        .lang-chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+        .lang-chip[aria-pressed="true"] {
+            color: #fff; background: var(--primary); border-color: var(--primary);
+            font-weight: 600;
+        }
+        /* Google injects a fixed top toolbar plus a body offset; both would cover the
+           hero and push the page down. The toolbar lives in a body-level .skiptranslate
+           wrapper (its inner iframe is what actually draws the bar). Do not hide every
+           body-level .skiptranslate element: the language menu iframe uses that class too. */
+        body > div.skiptranslate { display: none !important; }
+        .goog-te-banner-frame, .goog-te-balloon-frame, #goog-gt-tt { display: none !important; }
+        body { top: 0 !important; }
+        /* The widget host is only a translation engine now: keep it out of the layout. */
+        #google_translate_element {
+            position: absolute; left: -9999px; top: 0;
+            width: 1px; height: 1px; overflow: hidden; opacity: 0;
+            pointer-events: none;
+        }
+        /* narrow screens: one swipeable row instead of a tall stack */
+        @media (max-width: 700px) {
+            .lang-bar {
+                justify-content: flex-start; flex-wrap: nowrap;
+                padding: 6px 8px;
+                overflow-x: auto; overflow-y: hidden;
+                scrollbar-width: none; -ms-overflow-style: none;
+            }
+            .lang-bar::-webkit-scrollbar { display: none; }
+            .lang-chip { font-size: .78rem; padding: 3px 7px; }
+        }  }
     </style>
 </head>
 <body>
+
+<!-- ===== LANGUAGE BAR ===== -->
+<nav class="lang-bar notranslate" id="langBar" aria-label="Translate this page" translate="no">
+    <span class="globe" aria-hidden="true">&#x1F310;</span>
+    <button type="button" class="lang-chip" data-lang="en" lang="en">English</button>
+    <button type="button" class="lang-chip" data-lang="zh-CN" lang="zh-CN">中文</button>
+    <button type="button" class="lang-chip" data-lang="ja" lang="ja">日本語</button>
+    <button type="button" class="lang-chip" data-lang="ko" lang="ko">한국어</button>
+    <button type="button" class="lang-chip" data-lang="de" lang="de">Deutsch</button>
+    <button type="button" class="lang-chip" data-lang="fr" lang="fr">Français</button>
+    <button type="button" class="lang-chip" data-lang="es" lang="es">Español</button>
+    <button type="button" class="lang-chip" data-lang="pt" lang="pt">Português</button>
+    <button type="button" class="lang-chip" data-lang="it" lang="it">Italiano</button>
+    <button type="button" class="lang-chip" data-lang="nl" lang="nl">Nederlands</button>
+    <button type="button" class="lang-chip" data-lang="pl" lang="pl">Polski</button>
+    <button type="button" class="lang-chip" data-lang="ru" lang="ru">Русский</button>
+    <button type="button" class="lang-chip" data-lang="tr" lang="tr">T&#xFC;rk&#xE7;e</button>
+    <button type="button" class="lang-chip" data-lang="ar" lang="ar" dir="rtl">العربية</button>
+    <button type="button" class="lang-chip" data-lang="hi" lang="hi">हिन्दी</button>
+    <button type="button" class="lang-chip" data-lang="bn" lang="bn">বাংলা</button>
+    <button type="button" class="lang-chip" data-lang="ur" lang="ur" dir="rtl">اردو</button>
+    <button type="button" class="lang-chip" data-lang="th" lang="th">ไทย</button>
+    <button type="button" class="lang-chip" data-lang="vi" lang="vi">Ti&#x1EBF;ng Vi&#x1EC7;t</button>
+    <button type="button" class="lang-chip" data-lang="id" lang="id">Bahasa Indonesia</button>
+    <button type="button" class="lang-chip" data-lang="ms" lang="ms">Bahasa Melayu</button>
+    <div id="google_translate_element" aria-hidden="true"></div>
+</nav>
 
 <!-- ===== HERO ===== -->
 <header class="hero">
@@ -218,13 +298,13 @@
         <span>100% Offline</span>
         <span>No Data Collection</span>
     </div>
-    <h1><img src="assets/icon-128.png" alt="">4X Photo Slideshow</h1>
+    <h1><img src="assets/icon-128.png" alt="">4X Photo Slideshow - For Desktop</h1>
     <p class="tagline">Run up to 4 independent photo sets simultaneously on one screen.</p>
     <p class="subtagline">Flexible layouts, background audio, 13 animation types, multi-language support — all running natively on your desktop. Free Chrome extension, or the Linux desktop app for whatever you think it is worth.</p>
     <div>
-        <a href="http://download.sini.zip/4x-photo-slideshow-2.1.21-x86_64.tar.gz" class="btn btn-primary">Download for Linux</a>
-        <a href="#pricing" class="btn btn-outline">Name Your Price</a>
-        <a href="#free-trial" class="btn btn-outline">Try Free Extension</a>
+        <a href="http://download.sini.zip/4x-photo-slideshow-2.1-x86_64.tar" class="btn btn-primary">Download for Linux</a>
+        <!--<a href="#pricing" class="btn btn-outline">Name Your Price</a>
+        <a href="#free-trial" class="btn btn-outline">Try Free Extension</a>-->
     </div>
 </header>
 
@@ -432,7 +512,7 @@
                     <tr><td>Persistent settings (localStorage)</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
                     <tr class="highlight"><td><strong>Presenter Mode (Detachable Panel)</strong></td><td class="cross">&#x2717;</td><td class="check">&#x2713;</td></tr>
                     <tr class="highlight"><td><strong>Video export (WebM, MP4, AVI, MKV)</strong></td><td class="cross">&#x2717;</td><td class="check">&#x2713;</td></tr>
-                    <tr class="highlight"><td><strong>Native folder path persistence</strong></td><td class="cross">&#x2717;</td><td class="check">&#x2713;</td></tr>
+                    <tr class="highlight"><td><strong>Restore Folder (remembers the last browsed folder)</strong></td><td class="cross">&#x2717;</td><td class="check">&#x2713;</td></tr>
                     <tr class="highlight"><td><strong>Save / Load state</strong></td><td class="cross">&#x2717;</td><td class="check">&#x2713;</td></tr>
                     <tr class="highlight"><td><strong>No watermark</strong></td><td class="cross">&#x2717;</td><td class="check">&#x2713;</td></tr>
                     <tr style="font-weight:600;border-top:2px solid var(--text);">
@@ -631,7 +711,7 @@
                     <li>Everything in the free extension</li>
                     <li>Presenter Mode</li>
                     <li>Video export (WebM, MP4, AVI, MKV)</li>
-                    <li>Native folder path persistence</li>
+                    <li>Restore Folder (last browsed folder)</li>
                     <li>Save / Load state</li>
                     <li>No watermark</li>
                     <li>Bidirectional keyboard sync</li>
@@ -732,12 +812,110 @@
 
 <!-- ===== COOKIE CONSENT ===== -->
 <div class="cookie-banner" id="cookieBanner">
-    <span>This site uses no tracking cookies. By continuing, you acknowledge our <a href="#privacy">Privacy Policy</a>.</span>
+    <span>This site uses no tracking cookies. The language buttons use Google Translate, which may set its own cookie. By continuing, you acknowledge our <a href="#privacy">Privacy Policy</a>.</span>
     <button onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('cookie-consent','1')">Got it</button>
 </div>
 <script>
 (function(){if(localStorage.getItem('cookie-consent'))document.getElementById('cookieBanner').style.display='none';})();
 </script>
 
+<script>
+/* Language bar: a chip writes the Google Translate cookie and reloads the page;
+   Google's script then renders the page in that language. English clears it. */
+function langCookieDomains() {
+    var list = [''];
+    var host = location.hostname;
+    if (host && host.indexOf('.') !== -1 && host !== 'localhost') {
+        list.push('.' + host.split('.').slice(-2).join('.'));
+    }
+    return list;
+}
+function getLangCookie() {
+    var m = document.cookie.match(/(?:^|;\s*)googtrans=([^;]+)/);
+    if (!m) return 'en';
+    var parts = decodeURIComponent(m[1]).split('/');
+    var code = parts[parts.length - 1] || 'en';
+    return (code === '' || code === 'en') ? 'en' : code;
+}
+function writeLangCookie(value) {
+    var domains = langCookieDomains();
+    for (var i = 0; i < domains.length; i++) {
+        var d = domains[i] ? ';domain=' + domains[i] : '';
+        document.cookie = 'googtrans=' + value + ';path=/' + d;
+    }
+}
+function clearLangCookie() {
+    var domains = langCookieDomains();
+    for (var i = 0; i < domains.length; i++) {
+        var d = domains[i] ? ';domain=' + domains[i] : '';
+        document.cookie = 'googtrans=;path=/' + d + ';expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'googtrans=/en/en;path=/' + d + ';expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    }
+}
+function markActiveChip() {
+    var current = getLangCookie();
+    var chips = document.querySelectorAll('.lang-chip');
+    var bar = document.getElementById('langBar');
+    var active = null;
+    for (var i = 0; i < chips.length; i++) {
+        var on = chips[i].getAttribute('data-lang') === current;
+        chips[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (on) active = chips[i];
+    }
+    // on phones the bar is one swipeable row: bring the current language into view
+    if (active && bar && bar.scrollWidth > bar.clientWidth + 2) {
+        bar.scrollLeft = Math.max(0, active.offsetLeft - (bar.clientWidth - active.offsetWidth) / 2);
+    }
+}
+function setLang(code) {
+    if (!code) return;
+    if (code === getLangCookie()) return;
+    if (code === 'en') clearLangCookie(); else writeLangCookie('/en/' + code);
+    location.reload();
+}
+(function () {
+    var bar = document.getElementById('langBar');
+    if (!bar) return;
+    bar.addEventListener('click', function (e) {
+        var chip = e.target && e.target.closest ? e.target.closest('.lang-chip') : null;
+        if (!chip) return;
+        e.preventDefault();
+        setLang(chip.getAttribute('data-lang'));
+    });
+    markActiveChip();
+})();
+
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+        autoDisplay: false
+    }, 'google_translate_element');
+    markActiveChip();
+    // Belt and braces for the top toolbar: some widget builds insert it without the
+    // .skiptranslate wrapper, so hide any body-level Google box that spans the top edge.
+    tidyGoogleToolbar();
+    if (window.MutationObserver) {
+        new MutationObserver(tidyGoogleToolbar).observe(document.body, { childList: true });
+    }
+    window.addEventListener('resize', tidyGoogleToolbar);
+}
+function tidyGoogleToolbar() {
+    var host = document.getElementById('google_translate_element');
+    var kids = document.body.children;
+    for (var i = 0; i < kids.length; i++) {
+        var el = kids[i];
+        if (!el.className || String(el.className).indexOf('skiptranslate') === -1) continue;
+        if (host && el.contains(host)) continue;
+        var r = el.getBoundingClientRect();
+        // Only the toolbar hugs the top edge and spans most of the viewport; the
+        // language menu opens under the pill and is much narrower.
+        if (r.height > 16 && r.height < 90 && r.width > window.innerWidth * 0.6 && r.top <= 2) {
+            el.style.setProperty('display', 'none', 'important');
+        }
+    }
+}
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
 </body>
 </html>
